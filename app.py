@@ -1,52 +1,83 @@
+import re
 from flask import Flask, request, jsonify
+import sqlite3
 
 app = Flask(__name__)
 
-blogs_list = [
-    {
-      "id": 0,
-      "author": "enock kipronoh",
-      "language": "English",
-      "title": "Gender Equality",
-      "description": "Gender equality, also known as sexual equality or equality of the sexes, is the state of equal ease of access to resources and opportunities regardless of gender, including economic participation and decision-making; and the state of valuing different behaviors, aspirations and needs equally, regardless of gender."
-    },
-      {
-      "id": 2,
-      "author": "Jonson Nyang'au",
-      "language": "English",
-      "title": "The future of Python-Flask",
-      "description": "Python will be the language of the future. Testers will have to upgrade their skills and learn these languages to tame the AI and ML tools. Python might not have bright years in the past years (which is mainly launch in the year 1991) but it has seen a continuous and amazing trend of growth in the 21st century."
-    },
-      {
-      "id": 3,
-      "author": "Hellen Mutisya",
-      "language": "English",
-      "title": "The Current Economy",
-      "description": "The Economy of Kenya is a market-based economy with a few state enterprises. Major industries include agriculture, forestry, fishing, mining, manufacturing, energy, tourism and financial services."
-    },
+def db_connection():
+    conn = None
+    try:
+        conn = sqlite3.connect("blogs.sqlite")
+    except sqlite3.error as e:
+        print(e)
+    return conn
 
-]
 @app.route('/blogs', methods=['GET', 'POST'])
 def blogs():
+    conn = db_connection()
+    cursor = conn.cursor()
     if request.method == 'GET':
-        if len(blogs_list) > 0:
-            return jsonify(blogs_list)
-        else:
-            'Nothing Found', 404
+        cursor = conn.execute("SELECT * FROM blog")
+        blogs = [
+            dict(id=row[0], author=row[1], language=row[2], title=row[3], description=row[4])
+            for row in cursor.fetchall()
+        ]
+        if blogs is not None:
+            return jsonify(blogs)
+
     if request.method == 'POST':
         new_author = request.form['author']
         new_lang = request.form['author']
         new_title = request.form['title']
         new_desc = request.form['description']
-        iD = blogs_list[-1]['id']+1
+        sql = """INSERT INTO blog (author, language, title,description) VALUES (?,?,?,?)"""
 
-        new_obj = {
-            'id': iD,
-            'author': new_author,
-            'language':new_lang,
-            'title': new_title,
-            'description':new_desc
+        cursor = cursor.execute(sql, (new_author,new_lang,new_title,new_desc))
+        conn.commit()
+        return f"Blog with the id: {cursor.lastrowid} created successfully"
+
+@app.route('/blog/<int:id>', methods=['GET', 'PUT', 'DELETE'])
+def single_blog(id):
+    conn = db_connection()
+    cursor = conn.cursor()
+    blog = None
+    
+    if request.method == 'GET':
+        cursor.execute("SELECT * FROM blog WHERE id=?", (id,))
+        rows = cursor.fetchall()
+        for r in rows:
+            blog = r
+        if blog is not None:
+            return jsonify(blog), 200
+        else:
+            return "Something Wrong!", 404
+
+
+    if request.method == 'PUT':
+        sql="""UPDATE blog SET title=?, author=?, language=?, description=? WHERE id=?"""
+        author = request.form["author"]
+        language = request.form["language"]
+        title = request.form["title"]
+        description =request.form["description"]
+        updated_blog = {
+            "id": id,
+            "author": author,
+            "language": language,
+            "title": title,
+            "description": description
         }
-        blogs_list.append(new_obj)
-        return jsonify(blogs_list), 201
+        conn.execute(sql, (author, language, title, description, id))
+        conn.commit()
+        return jsonify(updated_blog)
+
+    if request.method == 'DELETE':
+        sql = """DELETE FROM blog WHERE id=?"""
+        conn.execute(sql, (id,))
+        conn.commit()
+        return "The blog with id: {} has been deleted.".format(id), 200
+        
+
+
+if __name__ == '__main__':
+        app.run(debug=True)
 
