@@ -24,6 +24,29 @@ blogs_list = [
       "title": "The Current Economy",
       "description": "The Economy of Kenya is a market-based economy with a few state enterprises. Major industries include agriculture, forestry, fishing, mining, manufacturing, energy, tourism and financial services."
     },
-    
 
 ]
+@app.route('/blogs', methods=['GET', 'POST'])
+def blogs():
+    if request.method == 'GET':
+        if len(blogs_list) > 0:
+            return jsonify(blogs_list)
+        else:
+            'Nothing Found', 404
+    if request.method == 'POST':
+        new_author = request.form['author']
+        new_lang = request.form['author']
+        new_title = request.form['title']
+        new_desc = request.form['description']
+        iD = blogs_list[-1]['id']+1
+
+        new_obj = {
+            'id': iD,
+            'author': new_author,
+            'language':new_lang,
+            'title': new_title,
+            'description':new_desc
+        }
+        blogs_list.append(new_obj)
+        return jsonify(blogs_list), 201
+
