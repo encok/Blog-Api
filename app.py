@@ -1,10 +1,10 @@
 import re
 from flask import Flask, request, jsonify
 import sqlite3
-from flask_cors import CORS
+
 
 app = Flask(__name__)
-CORS(app)
+
 
 def db_connection():
     conn = None
@@ -13,11 +13,9 @@ def db_connection():
     except sqlite3.error as e:
         print(e)
     return conn
-@app.route("/")
-def helloWorld():
-  return "Hello, cross-origin-world!"
 
-  
+
+
 @app.route('/blogs', methods=['GET', 'POST'])
 def blogs():
     conn = db_connection()
