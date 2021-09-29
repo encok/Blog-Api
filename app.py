@@ -1,9 +1,11 @@
 import re
 from flask import Flask, request, jsonify
 import sqlite3
+from flask_cors import CORS,cross_origin
 
 
 app = Flask(__name__)
+CORS(app)
 
 
 def db_connection():
