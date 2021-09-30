@@ -61,10 +61,10 @@ def single_blog(id):
 
     if request.method == 'PUT':
         sql="""UPDATE blog SET title=?, author=?, language=?, description=? WHERE id=?"""
-        author = request.form["author"]
-        language = request.form["language"]
         title = request.form["title"]
         description =request.form["description"]
+        author = request.form["author"]
+        language = request.form["language"]
         updated_blog = {
             "id": id,
             "author": author,
