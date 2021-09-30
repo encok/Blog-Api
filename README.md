@@ -8,7 +8,7 @@ Blog Api
 
 ## Link to Live Site 
 
-
+https://github.com/encok/Blog-Api
 
 
 ## Description
@@ -45,3 +45,4 @@ email: enckkipronoh@gmail.com<br/>
 Phone: 0717854859
 ## License
 This is the link to the MIT license used<br/><br/>
+https://github.com/encok/Blog-Api/blob/master/LICENSE
